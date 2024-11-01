@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Post;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class PostController extends Controller
 {
@@ -20,7 +21,6 @@ class PostController extends Controller
     {
         // Find the posts by ID
         $post = Post::findOrFail($id);
-
         // Pass the posts to the view
         return view('posts.show', compact('post'));
     }
@@ -31,6 +31,7 @@ class PostController extends Controller
     public function create()
     {
         //
+        return view('posts.create');
     }
 
     /**
@@ -38,9 +39,30 @@ class PostController extends Controller
      */
     public function store(Request $request)
     {
-        //
-    }
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'photo' => 'required|image',
+            'description' => 'required|string',
+        ]);
 
+        // Create new post instance
+        $post = new Post();
+        $post->name = $request->name;
+        $post->by_user = Auth::user()->name;  // Automatically set the "Posted By" field
+        $post->description = $request->description;
+        $post->likes = 0;
+
+        // Handle the photo upload
+        if ($request->hasFile('photo')) {
+            $filename = time() . '.' . $request->photo->extension();
+            $request->photo->move(public_path('images'), $filename);
+            $post->photo = $filename;
+        }
+
+        $post->save();
+
+        return redirect()->route('posts.index')->with('success', 'Post created successfully.');
+    }
     /**
      * Show the form for editing the specified resource.
      */
