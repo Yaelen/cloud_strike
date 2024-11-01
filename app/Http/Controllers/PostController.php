@@ -16,12 +16,9 @@ class PostController extends Controller
         $posts = Post::all();
         return view('posts.index', compact('posts'));
     }
-
     public function show($id)
     {
-        // Find the posts by ID
         $post = Post::findOrFail($id);
-        // Pass the posts to the view
         return view('posts.show', compact('post'));
     }
 
@@ -30,7 +27,6 @@ class PostController extends Controller
      */
     public function create()
     {
-        //
         return view('posts.create');
     }
 
@@ -45,14 +41,12 @@ class PostController extends Controller
             'description' => 'required|string',
         ]);
 
-        // Create new post instance
         $post = new Post();
         $post->name = $request->name;
-        $post->by_user = Auth::user()->name;  // Automatically set the "Posted By" field
+        $post->by_user = Auth::user()->name;
         $post->description = $request->description;
         $post->likes = 0;
 
-        // Handle the photo upload
         if ($request->hasFile('photo')) {
             $filename = time() . '.' . $request->photo->extension();
             $request->photo->move(public_path('images'), $filename);
@@ -63,6 +57,7 @@ class PostController extends Controller
 
         return redirect()->route('posts.index')->with('success', 'Post created successfully.');
     }
+
     /**
      * Show the form for editing the specified resource.
      */
@@ -84,17 +79,11 @@ class PostController extends Controller
      */
     public function destroy($id)
     {
-        // Retrieve a single post by ID
         $post = Post::findOrFail($id);
-
-        // Check if the logged-in user is the creator of the post
         if ($post->by_user !== Auth::user()->name) {
             return redirect()->route('posts.index')->with('error', 'You are not authorized to delete this post.');
         }
-
-        // Delete the post
         $post->delete();
-
         return redirect()->route('posts.index')->with('success', 'Post deleted successfully.');
     }
 }

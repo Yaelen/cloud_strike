@@ -11,7 +11,6 @@
     <p>{{ $post->description }}</p>
     <p>Likes: {{ $post->likes }}</p>
 
-    <!-- Delete Button -->
     @if(Auth::check() && Auth::user()->name == $post->by_user)
         <form action="{{ route('posts.destroy', $post->id) }}" method="POST" style="display:inline;">
             @csrf
